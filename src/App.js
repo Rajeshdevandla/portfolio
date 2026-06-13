@@ -1,28 +1,42 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import './App.css';
 
 // ── Animated floating particles background ──────────────────────────
-function Particles() {
+// Perf: fewer dots (35 vs 60), throttled connections every 2nd frame,
+// resize debounced via rAF, dots not recreated on resize
+const Particles = memo(function Particles() {
   const canvasRef = useRef(null);
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     let animId;
-    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-    resize();
-    window.addEventListener('resize', resize);
-    const dots = Array.from({ length: 60 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
+    let frameCount = 0;
+    const dots = Array.from({ length: 35 }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
       r: Math.random() * 2 + 1,
       dx: (Math.random() - 0.5) * 0.4,
       dy: (Math.random() - 0.5) * 0.4,
       alpha: Math.random() * 0.5 + 0.2,
     }));
+    let rafResize = null;
+    const resize = () => {
+      if (rafResize) return;
+      rafResize = requestAnimationFrame(() => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        rafResize = null;
+      });
+    };
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    window.addEventListener('resize', resize);
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const draw = () => {
+      frameCount++;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       dots.forEach(d => {
-        d.x += d.dx; d.y += d.dy;
+        if (!prefersReduced) { d.x += d.dx; d.y += d.dy; }
         if (d.x < 0 || d.x > canvas.width) d.dx *= -1;
         if (d.y < 0 || d.y > canvas.height) d.dy *= -1;
         ctx.beginPath();
@@ -30,74 +44,93 @@ function Particles() {
         ctx.fillStyle = `rgba(99,179,237,${d.alpha})`;
         ctx.fill();
       });
-      // draw connections
-      dots.forEach((a, i) => dots.slice(i + 1).forEach(b => {
-        const dist = Math.hypot(a.x - b.x, a.y - b.y);
-        if (dist < 120) {
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.strokeStyle = `rgba(99,179,237,${0.15 * (1 - dist / 120)})`;
-          ctx.lineWidth = 0.5;
-          ctx.stroke();
+      // Draw connections only every 2nd frame – halves connection draw cost
+      if (frameCount % 2 === 0) {
+        for (let i = 0; i < dots.length; i++) {
+          for (let j = i + 1; j < dots.length; j++) {
+            const dx = dots[i].x - dots[j].x;
+            const dy = dots[i].y - dots[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 120) {
+              ctx.beginPath();
+              ctx.moveTo(dots[i].x, dots[i].y);
+              ctx.lineTo(dots[j].x, dots[j].y);
+              ctx.strokeStyle = `rgba(99,179,237,${0.15 * (1 - dist / 120)})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          }
         }
-      }));
+      }
       animId = requestAnimationFrame(draw);
     };
     draw();
-    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
+    return () => {
+      cancelAnimationFrame(animId);
+      if (rafResize) cancelAnimationFrame(rafResize);
+      window.removeEventListener('resize', resize);
+    };
   }, []);
   return <canvas ref={canvasRef} className="particles-canvas" />;
-}
+});
 
 // ── Typewriter hook ─────────────────────────────────────────────────
+// Perf: single ref for mutable state avoids cascading setState re-renders
 function useTypewriter(texts, speed = 80, pause = 1800) {
   const [display, setDisplay] = useState('');
-  const [idx, setIdx] = useState(0);
-  const [charIdx, setCharIdx] = useState(0);
-  const [deleting, setDeleting] = useState(false);
+  const stateRef = useRef({ idx: 0, charIdx: 0, deleting: false });
   useEffect(() => {
-    const current = texts[idx % texts.length];
-    const timeout = setTimeout(() => {
-      if (!deleting) {
-        setDisplay(current.slice(0, charIdx + 1));
-        if (charIdx + 1 === current.length) setTimeout(() => setDeleting(true), pause);
-        else setCharIdx(c => c + 1);
+    const s = stateRef.current;
+    const current = texts[s.idx % texts.length];
+    const delay = s.deleting ? speed / 2 : speed;
+    const timer = setTimeout(() => {
+      if (!s.deleting) {
+        setDisplay(current.slice(0, s.charIdx + 1));
+        if (s.charIdx + 1 === current.length) {
+          setTimeout(() => { s.deleting = true; }, pause);
+        } else {
+          s.charIdx++;
+        }
       } else {
-        setDisplay(current.slice(0, charIdx - 1));
-        if (charIdx === 0) { setDeleting(false); setIdx(i => i + 1); }
-        else setCharIdx(c => c - 1);
+        setDisplay(current.slice(0, s.charIdx - 1));
+        if (s.charIdx === 0) { s.deleting = false; s.idx++; }
+        else { s.charIdx--; }
       }
-    }, deleting ? speed / 2 : speed);
-    return () => clearTimeout(timeout);
-  }, [charIdx, deleting, idx, texts, speed, pause]);
+    }, delay);
+    return () => clearTimeout(timer);
+  });
   return display;
 }
 
 // ── Scroll-reveal hook ──────────────────────────────────────────────
+// Perf: observer disconnects after element becomes visible
 function useScrollReveal(threshold = 0.15) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true); }, { threshold });
-    if (ref.current) obs.observe(ref.current);
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold });
+    obs.observe(el);
     return () => obs.disconnect();
   }, [threshold]);
   return [ref, visible];
 }
 
 // ── Reveal wrapper ──────────────────────────────────────────────────
-function Reveal({ children, delay = 0, className = '' }) {
+const Reveal = memo(function Reveal({ children, delay = 0, className = '' }) {
   const [ref, visible] = useScrollReveal();
   return (
     <div ref={ref} className={`reveal ${visible ? 'visible' : ''} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
       {children}
     </div>
   );
-}
+});
 
 // ── SVG Illustrations ───────────────────────────────────────────────
-const CodeIllustration = () => (
+const CodeIllustration = memo(() => (
   <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" className="hero-svg">
     <rect x="20" y="20" width="360" height="260" rx="16" fill="#1a1f2e" stroke="#3b82f6" strokeWidth="1.5"/>
     <rect x="20" y="20" width="360" height="36" rx="16" fill="#2d3553"/>
@@ -122,9 +155,9 @@ const CodeIllustration = () => (
     <rect x="40" y="238" width="160" height="2" rx="1" fill="#34d399" opacity="0.4"/>
     <rect x="40" y="248" width="100" height="2" rx="1" fill="#fbbf24" opacity="0.5"/>
   </svg>
-);
+));
 
-const ServerIllustration = () => (
+const ServerIllustration = memo(() => (
   <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" className="project-svg">
     <rect x="10" y="20" width="100" height="25" rx="5" fill="#1e293b" stroke="#3b82f6" strokeWidth="1.5"/>
     <circle cx="25" cy="32" r="4" fill="#22c55e"/>
@@ -139,9 +172,9 @@ const ServerIllustration = () => (
     <rect x="35" y="92" width="60" height="4" rx="2" fill="#334155"/>
     <rect x="35" y="98" width="35" height="3" rx="1.5" fill="#34d399" opacity="0.7"/>
   </svg>
-);
+));
 
-const CloudIllustration = () => (
+const CloudIllustration = memo(() => (
   <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" className="project-svg">
     <ellipse cx="60" cy="65" rx="45" ry="28" fill="#1e293b" stroke="#3b82f6" strokeWidth="1.5"/>
     <ellipse cx="45" cy="58" rx="22" ry="18" fill="#1e293b" stroke="#3b82f6" strokeWidth="1.5"/>
@@ -153,9 +186,9 @@ const CloudIllustration = () => (
     <circle cx="60" cy="107" r="5" fill="#a78bfa"/>
     <circle cx="85" cy="104" r="5" fill="#34d399"/>
   </svg>
-);
+));
 
-const AppIllustration = () => (
+const AppIllustration = memo(() => (
   <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" className="project-svg">
     <rect x="20" y="10" width="80" height="100" rx="10" fill="#1e293b" stroke="#3b82f6" strokeWidth="1.5"/>
     <rect x="30" y="22" width="60" height="38" rx="4" fill="#0f172a"/>
@@ -169,10 +202,10 @@ const AppIllustration = () => (
     <circle cx="77" cy="81" r="6" fill="#a78bfa" opacity="0.7"/>
     <circle cx="60" cy="108" r="4" fill="#334155"/>
   </svg>
-);
+));
 
 // ── Skill Bar ───────────────────────────────────────────────────────
-function SkillBar({ name, level, color, delay }) {
+const SkillBar = memo(function SkillBar({ name, level, color, delay }) {
   const [ref, visible] = useScrollReveal();
   return (
     <div ref={ref} className="skill-item" style={{ transitionDelay: `${delay}ms` }}>
@@ -185,16 +218,16 @@ function SkillBar({ name, level, color, delay }) {
       </div>
     </div>
   );
-}
+});
 
 // ── Data ────────────────────────────────────────────────────────────
 const skills = [
   { name: 'Java / Spring Boot', level: 90, color: 'linear-gradient(90deg,#f59e0b,#ef4444)' },
-  { name: 'React / Angular',    level: 85, color: 'linear-gradient(90deg,#3b82f6,#a78bfa)' },
+  { name: 'React / Angular', level: 85, color: 'linear-gradient(90deg,#3b82f6,#a78bfa)' },
   { name: 'AWS / Docker / K8s', level: 80, color: 'linear-gradient(90deg,#10b981,#3b82f6)' },
   { name: 'PostgreSQL / MySQL', level: 82, color: 'linear-gradient(90deg,#a78bfa,#ec4899)' },
   { name: 'REST APIs / Microservices', level: 88, color: 'linear-gradient(90deg,#06b6d4,#3b82f6)' },
-  { name: 'Git / CI-CD',        level: 78, color: 'linear-gradient(90deg,#f97316,#eab308)' },
+  { name: 'Git / CI-CD', level: 78, color: 'linear-gradient(90deg,#f97316,#eab308)' },
 ];
 
 const projects = [
@@ -230,6 +263,7 @@ const techStack = ['Java','Spring Boot','React','Angular','AWS','Docker','Kubern
 function App() {
   const roles = useTypewriter(['Full Stack Java Developer','Spring Boot Engineer','React Developer','AWS Cloud Builder','Microservices Architect']);
   const [menuOpen, setMenuOpen] = useState(false);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   return (
     <div className="app-root">
@@ -243,7 +277,7 @@ function App() {
         </button>
         <ul className={`nav-links ${menuOpen ? 'open' : ''}`}>
           {['About','Skills','Projects','Experience','Contact'].map(s => (
-            <li key={s}><a href={`#${s.toLowerCase()}`} onClick={() => setMenuOpen(false)}>{s}</a></li>
+            <li key={s}><a href={`#${s.toLowerCase()}`} onClick={closeMenu}>{s}</a></li>
           ))}
         </ul>
       </nav>
