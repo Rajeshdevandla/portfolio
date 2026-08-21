@@ -199,28 +199,28 @@ const skills = [
 
 const projects = [
 {
-title: 'Smart Expense Tracker',
-desc: 'Full-stack app to track expenses, manage transactions, and visualize spending with charts.',
-stack: ['Java', 'Spring Boot', 'React', 'PostgreSQL'],
-svg: <ServerIllustration />,
-link: 'https://github.com/Rajeshdevandla',
-color: '#3b82f6',
-},
-{
-title: 'Cloud Microservices Platform',
-desc: 'Scalable microservices architecture on AWS with Docker, Kubernetes and event-driven messaging.',
-stack: ['Spring Boot', 'AWS', 'Docker', 'Kubernetes', 'Kafka'],
-svg: <CloudIllustration />,
-link: 'https://github.com/Rajeshdevandla',
+title: 'AgentFlow',
+desc: 'Multi-agent orchestration system with a Constitutional AI safety layer, decision logging, and an evaluation framework.',
+stack: ['Python', 'Anthropic SDK', 'FastAPI', 'Pytest'],
+svg: <AppIllustration />,
+link: 'https://github.com/Rajeshdevandla/agent-flow',
 color: '#a78bfa',
 },
 {
-title: 'React Dashboard App',
-desc: 'Interactive admin dashboard with real-time data visualisation, REST API integration and responsive UI.',
-stack: ['React', 'Node.js', 'MySQL', 'Chart.js'],
-svg: <AppIllustration />,
-link: 'https://github.com/Rajeshdevandla',
+title: 'AskDocs AI',
+desc: 'RAG application for asking questions about PDFs with document-grounded answers and page citations.',
+stack: ['Python', 'Amazon Bedrock', 'FAISS', 'FastAPI'],
+svg: <CloudIllustration />,
+link: 'https://github.com/Rajeshdevandla/askdocs-ai',
 color: '#34d399',
+},
+{
+title: 'AI Document Intelligence',
+desc: 'Asynchronous document-processing platform combining Java microservices, OCR, LLM extraction, Kafka, and a React dashboard.',
+stack: ['Java', 'Spring Boot', 'React', 'Kafka'],
+svg: <ServerIllustration />,
+link: 'https://github.com/Rajeshdevandla/ai-document-intelligence-platform',
+color: '#3b82f6',
 },
 ];
 
