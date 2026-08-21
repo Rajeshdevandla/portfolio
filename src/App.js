@@ -189,12 +189,12 @@ return (
 
 // ── Data ────────────────────────────────────────────────────────────
 const skills = [
-{ name: 'Java / Spring Boot', level: 90, color: 'linear-gradient(90deg,#f59e0b,#ef4444)' },
-{ name: 'React / Angular', level: 85, color: 'linear-gradient(90deg,#3b82f6,#a78bfa)' },
-{ name: 'AWS / Docker / K8s', level: 80, color: 'linear-gradient(90deg,#10b981,#3b82f6)' },
-{ name: 'PostgreSQL / MySQL', level: 82, color: 'linear-gradient(90deg,#a78bfa,#ec4899)' },
-{ name: 'REST APIs / Microservices', level: 88, color: 'linear-gradient(90deg,#06b6d4,#3b82f6)' },
-{ name: 'Git / CI-CD', level: 78, color: 'linear-gradient(90deg,#f97316,#eab308)' },
+{ name: 'LLM Application Engineering', level: 90, color: 'linear-gradient(90deg,#f59e0b,#ef4444)' },
+{ name: 'RAG / Vector Retrieval', level: 86, color: 'linear-gradient(90deg,#3b82f6,#a78bfa)' },
+{ name: 'Agentic AI Systems', level: 84, color: 'linear-gradient(90deg,#10b981,#3b82f6)' },
+{ name: 'Python / FastAPI', level: 88, color: 'linear-gradient(90deg,#a78bfa,#ec4899)' },
+{ name: 'Java / Spring Boot', level: 86, color: 'linear-gradient(90deg,#06b6d4,#3b82f6)' },
+{ name: 'AWS / Docker / CI-CD', level: 80, color: 'linear-gradient(90deg,#f97316,#eab308)' },
 ];
 
 const projects = [
@@ -224,11 +224,11 @@ color: '#3b82f6',
 },
 ];
 
-const techStack = ['Java','Spring Boot','React','Angular','AWS','Docker','Kubernetes','PostgreSQL','MySQL','REST API','Microservices','Git'];
+const techStack = ['Python','OpenAI','Anthropic','Amazon Bedrock','RAG','Agentic AI','FastAPI','Java','Spring Boot','AWS','Docker','Kafka'];
 
 // ── App ─────────────────────────────────────────────────────────────
 function App() {
-const roles = useTypewriter(['Full Stack Java Developer','Spring Boot Engineer','React Developer','AWS Cloud Builder','Microservices Architect']);
+const roles = useTypewriter(['AI Engineer','Generative AI Engineer','LLM Application Engineer','Agentic AI Engineer','RAG Engineer']);
 const [menuOpen, setMenuOpen] = useState(false);
 
 return (
@@ -255,8 +255,8 @@ return (
 <h1 className="hero-name">Rajesh <span>Kumar</span></h1>
 <h2 className="hero-role"><span className="cursor-text">{roles}</span><span className="cursor">|</span></h2>
 <p className="hero-desc">
-4+ years building scalable web applications and distributed systems.
-Passionate about clean architecture, performance, and modern cloud infrastructure.
+Building production AI applications, RAG systems, and agentic workflows.
+Focused on reliable LLM integration, evaluation, safety, and cloud delivery.
 </p>
 <div className="hero-tech">
 {techStack.map(t => <span key={t} className="tech-pill">{t}</span>)}
@@ -327,11 +327,11 @@ View on GitHub ↗
 <div className="timeline-dot" style={{ background: '#3b82f6' }}/>
 <div className="timeline-content">
 <span className="timeline-period">2022 – Present</span>
-<h3>Full Stack Java Developer</h3>
+<h3>Software Engineer II — AI Focus</h3>
 <p className="timeline-company">Current Role</p>
-<p>Building scalable microservices with Java/Spring Boot, designing React frontends, and deploying on AWS infrastructure.</p>
+<p>Building AI-powered applications, LLM integrations, and cloud services using Python, Java, FastAPI, Spring Boot, and AWS.</p>
 <div className="stack-pills">
-{['Java','Spring Boot','React','AWS','Docker'].map(t => <span key={t} className="stack-pill">{t}</span>)}
+{['Python','LLM APIs','FastAPI','Java','AWS'].map(t => <span key={t} className="stack-pill">{t}</span>)}
 </div>
 </div>
 </Reveal>
@@ -353,7 +353,7 @@ View on GitHub ↗
 {/* CONTACT */}
 <section className="section section-alt" id="contact">
 <Reveal><h2 className="section-title">Let's <span>Connect</span></h2></Reveal>
-<Reveal delay={100}><p className="section-sub">Open to full-time roles and freelance projects</p></Reveal>
+<Reveal delay={100}><p className="section-sub">Open to AI Engineer and Generative AI opportunities</p></Reveal>
 <div className="contact-grid">
 <Reveal delay={0}>
 <a href="mailto:rajeshdevandla11@gmail.com" className="contact-card">
@@ -385,7 +385,7 @@ View on GitHub ↗
 {/* FOOTER */}
 <footer className="footer">
 <p>Designed & Built by <strong>Rajesh Kumar</strong> · {new Date().getFullYear()}</p>
-<p className="footer-sub">Java · Spring Boot · React · AWS</p>
+<p className="footer-sub">AI Engineering · LLM Applications · RAG · Agentic Systems</p>
 </footer>
 </div>
 );
