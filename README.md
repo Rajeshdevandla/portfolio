@@ -1,12 +1,12 @@
 # Rajesh Kumar — AI Engineer Portfolio
 
-A responsive personal portfolio showcasing production AI applications, agentic systems, RAG pipelines, and cloud engineering.
+A responsive personal portfolio showcasing my AI engineering, full-stack Java, and cloud work.
 
 ## Highlights
 
-- AI application engineering with Python, FastAPI, Java, and Spring Boot
-- LLM integration with OpenAI, Anthropic, Amazon Bedrock, RAG, and agentic workflows
-- Cloud delivery with AWS, Docker, Kubernetes, Kafka, and CI/CD
+- Full-stack experience with Java, Spring Boot, React, and Angular
+- Cloud-native development with AWS, Docker, and Kubernetes
+- Microservices, REST APIs, Kafka, and relational databases
 - Interactive project, skills, experience, and contact sections
 - Responsive design with animated backgrounds and scroll-reveal effects
 
@@ -39,7 +39,7 @@ The optimized site will be generated in the `build/` directory.
 
 ## Featured Work
 
-The portfolio links to selected projects from my [GitHub profile](https://github.com/Rajeshdevandla), including LLM applications, document intelligence, RAG systems, and multi-agent orchestration.
+The portfolio links to selected projects from my [GitHub profile](https://github.com/Rajeshdevandla), including Java/Spring Boot services, cloud infrastructure, and AI applications.
 
 ## Contact
 
