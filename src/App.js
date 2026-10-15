@@ -265,6 +265,7 @@ Focused on LLM-powered products, clean architecture, and cloud delivery.
 <a href="#projects" className="btn btn-primary">View Projects</a>
 <a href="#contact" className="btn btn-outline">Contact Me</a>
 <a href="https://github.com/Rajeshdevandla" target="_blank" rel="noreferrer" className="btn btn-ghost">GitHub ↗</a>
+<a href="https://www.hackerrank.com/profile/rajeshdevandla9" target="_blank" rel="noreferrer" className="btn btn-ghost">HackerRank ↗</a>
 </div>
 </div>
 <div className="hero-image">
@@ -377,6 +378,12 @@ View on GitHub ↗
 <a href="https://github.com/Rajeshdevandla" target="_blank" rel="noreferrer" className="contact-card">
 <div className="contact-icon">🐙</div>
 <div><strong>GitHub</strong><p>Rajeshdevandla</p></div>
+</a>
+</Reveal>
+<Reveal delay={320}>
+<a href="https://www.hackerrank.com/profile/rajeshdevandla9" target="_blank" rel="noreferrer" className="contact-card">
+<div className="contact-icon">🏆</div>
+<div><strong>HackerRank</strong><p>rajeshdevandla9</p></div>
 </a>
 </Reveal>
 </div>
